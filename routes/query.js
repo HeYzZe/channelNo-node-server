@@ -11,6 +11,7 @@ var dbConfig = require('../database/DBConfig');
 var querysql = require('../database/querysql');
 // 使用DBConfig中配置创建MySQL连接
 var pool = mysql.createPool(dbConfig.mysql);
+
 // 响应JSON数据
 var responseJSON = function(res, ret) {
   if (typeof ret === 'undefined') {

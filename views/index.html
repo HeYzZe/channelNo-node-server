@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+  <div id="app">
+    <el-container>
+      <el-header>
+        <el-form :model='form' :inline="true" size="mini">
+          <el-form-item label="渠道号：" v-show="isChannel">
+            <el-input v-model="form.channel_no"></el-input>
+          </el-form-item>
+          <el-form-item label="日期：">
+            <el-date-picker value-format="yyyy-MM-dd" v-model="form.stat_date" type="date" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item label="pv：">
+            <el-input v-model="form.pv"></el-input>
+          </el-form-item>
+          <el-form-item label="uv：">
+            <el-input v-model="form.uv"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" size="mini" icon="el-icon-search" :loading='loading' @click="onRefreshData">查询</el-button>
+          </el-form-item>
+        </el-form>
+      </el-header>
+      <el-main>
+        <el-table :data="dataList">
+          <el-table-column type="index" label="序号"></el-table-column>
+          <el-table-column prop="channel_no" label="渠道号"></el-table-column>
+          <el-table-column prop="stat_date" label="日期"></el-table-column>
+          <el-table-column prop="pv" label="pv"></el-table-column>
+          <el-table-column prop="uv" label="uv"></el-table-column>
+        </el-table>
+      </el-main>
+    </el-container>
+  </div>
+</body>
+  <!-- import Vue before Element -->
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <!-- import JavaScript -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+  <script src="./javascripts/ajax.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: () => {
+        return {
+          pswd: "ys1995", // CryptoJS.AES 加密密钥
+          dataList: [],
+          form: {
+            channel_no: '',
+            stat_date: '',
+            pv: '',
+            uv: '',
+          },
+          isChannel: false,
+          loading: false
+        }
+      },
+      created() {
+        this.form.channel_no = this.get_query_string('no');
+      },
+      methods: {
+        get_query_string(name) { // 根据name获取url参数
+          var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+          var r = window.location.search.substr(1).match(reg); //search,查询？后面的参数，并匹配正则
+          if (r != null) return decodeURI(r[2]);
+          return null;
+        },
+        onRefreshData() {
+          this.loading = true;
+          this.getChannelNo(this.form);
+        },
+        getChannelNo(form) {
+          http({
+            method: 'GET',
+            url: './query/',
+            data: form,
+          }, (res) => {
+            // console.log(res, 'res');
+            this.dataList = JSON.parse(res).data;
+            this.loading = false;
+          }, (err) => {
+            // console.log(err, 'err');
+            this.loading = false;
+          })
+        }
+      }
+    })
+  </script>
+</html>
